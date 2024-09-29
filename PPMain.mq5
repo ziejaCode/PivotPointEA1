@@ -59,6 +59,7 @@ void PivotPoints(){
    double R2 = PivotPoint + (PPHighx1 - PPLowx1);
    
    DrawPivotPoints(PivotPoint,S1,S2,R1,R2);
+   //DrawPivotPoints(PivotPoint,S1,S2,R1,R2);
 
 }
 
