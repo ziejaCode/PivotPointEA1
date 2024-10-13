@@ -16,7 +16,7 @@ input group "================== Inputs for Pivot Points ================"
       input ENUM_TIMEFRAMES TF4Charts = PERIOD_CURRENT; //Timeframes for EA to run on
       input TF4PP TF4PPChoice = 0; //Timeframe for Pivot Points
       ENUM_TIMEFRAMES PPTimeframe;
-      input color TLColor = clrChartreuse;
+      input color TLColor = clrRed;
       
 
 int OnInit()
@@ -28,6 +28,7 @@ int OnInit()
    if(TF4PPChoice==1){
       PPTimeframe = PERIOD_W1;
    }
+   ChartSetInteger(0,CHART_SHOW_GRID,false);
   
    return(INIT_SUCCEEDED);
   }
@@ -38,12 +39,10 @@ void OnDeinit(const int reason)
   {
    
   }
-  
-  
-  
+ 
 void OnTick()
   {
-   
+   PivotPoints();
   }
   
 void PivotPoints(){
@@ -65,9 +64,15 @@ void PivotPoints(){
 
 void DrawPivotPoints(double PP, double S1, double S2, double R1, double R2){
 
-   ObjectCreate(0, "PP", OBJ_TREND, 0,iTime(_Symbol, PPTimeframe,0),PP,iTime(_Symbol,PPTimeframe,0)+PeriodSeconds(PPTimeframe),PP);
+   ObjectCreate(0,"PP",OBJ_TREND,0,iTime(_Symbol,PPTimeframe,0),PP,iTime(_Symbol,PPTimeframe,0)+PeriodSeconds(PPTimeframe),PP);
    ObjectSetInteger(0,"PP",OBJPROP_COLOR,TLColor);
+   ObjectSetInteger(0,"PP",OBJPROP_WIDTH,3);
    
-   ObjectCreate(0, "S1", OBJ_TREND, 0,iTime(_Symbol, PPTimeframe,0),S1,iTime(_Symbol,PPTimeframe,0)+PeriodSeconds(PPTimeframe),S1);
+   ObjectCreate(0,"S1",OBJ_TREND,0,iTime(_Symbol,PPTimeframe,0),S1,iTime(_Symbol,PPTimeframe,0)+PeriodSeconds(PPTimeframe),S1);
    ObjectSetInteger(0,"S1",OBJPROP_COLOR,TLColor);
+   ObjectSetInteger(0,"S1",OBJPROP_WIDTH,3);
+   
+   ObjectCreate(0,"S1text",OBJ_TEXT,0,iTime(_Symbol,PPTimeframe,0),S1);
+   ObjectSetString(0,"S1text",OBJPROP_TEXT,"S1");
+   ObjectSetInteger(0,"S1text",OBJPROP_COLOR,TLColor);
 }
