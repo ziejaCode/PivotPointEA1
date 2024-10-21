@@ -88,10 +88,10 @@ void PivotPoints(){
    Print("Position no is ",CheckPlacedPositions(MagicNumber));
    
    if(CheckPlacedPositions(MagicNumber) == false){
-      S1alreadyTraded=0;
-      R1alreadyTraded=0;
+      //S1alreadyTraded=0;
+      //R1alreadyTraded=0;
       OpenTrade(PivotPoint,S1,S2,R1,R2);
-       Print("Position no is now ",CheckPlacedPositions(MagicNumber));
+      Print("Position no is now ",CheckPlacedPositions(MagicNumber));
    }
 
 }
@@ -319,12 +319,10 @@ return tp;
 bool CheckPlacedPositions(ulong pMagic)
 {	
 	bool placedPosition = false;
-	
 	for(int i = PositionsTotal() - 1; i >= 0; i--)
 	{
 	   ulong positionTicket = PositionGetTicket(i);
 	   PositionSelectByTicket(positionTicket);
-
 	   ulong posMagic = PositionGetInteger(POSITION_MAGIC);
 	   
 	   if(posMagic == pMagic)
@@ -333,6 +331,5 @@ bool CheckPlacedPositions(ulong pMagic)
 	      break;
 	   }
 	}
-	
 	return placedPosition;
 }
