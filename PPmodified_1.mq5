@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                       PPMain.mq5 |
+//|                                                 PPmodified_1.mq5 |
 //|                                  Copyright 2024, MetaQuotes Ltd. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -36,7 +36,7 @@ input group "================== Inputs for Pivot Points ================"
 input group "================== Risk and Money Management ================" 
 
       input lotSizeType lotType=0; //fixed lot or 1% of the account balance
-      input double lotsize = 0.1;
+      input double lotsize = 0.01;
       input double RiskPct = 1;
 
 
@@ -85,7 +85,7 @@ void PivotPoints(){
    
    DrawPivotPoints(PivotPoint,S1,S2,R1,R2);
    
-   //Print("Position no is ",CheckPlacedPositions(MagicNumber));
+   Print("Position no is ",CheckPlacedPositions(MagicNumber));
    
    if(CheckPlacedPositions(MagicNumber) == false){
       //S1alreadyTraded=0;
@@ -137,7 +137,7 @@ void DrawPivotPoints(double PP, double S1, double S2, double R1, double R2){
 void OpenTrade(double PP, double S1, double S2, double R1, double R2){
 
 
-      //Print("Open trade entered");
+      Print("Open trade entered");
 
       double Lowx1 = iLow(_Symbol,TF4Chart,1);
       double Closex1 = iClose(_Symbol,TF4Chart,1);
@@ -154,59 +154,38 @@ void OpenTrade(double PP, double S1, double S2, double R1, double R2){
       // Bounce back from S1
             Print("S1alreadyTraded is ",S1alreadyTraded);
             if(Lowx1<S1 && Closex1>S1 && S1alreadyTraded<1){
-                  
-                  
+                  //Print("Lowx1 is ",Lowx1,"S1 is ",S1," Closex1 is ",Closex1);
                   double sl = calcSL(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
-                  double lots = lotsize;
-                  
-                  //if(sl==0){trade.Buy(lots,_Symbol,0,0,0,NULL);}
-                  //if(sl!=0){trade.Buy(lots,_Symbol,0,300,0,NULL);}
-                  
-                  trade.Buy(0.1,_Symbol,0,300,500,NULL);
-                  
-                  
-                  //Print("Lowx1 is ",Lowx1,"S1 is ",S1," Closex1 is ",Closex1);              
-                 /** double sl = calcSL(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
                   double tp = calcTp(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
-                  //Print("sl is ",sl, " tp is ", tp);
+                  Print("sl is ",sl, " tp is ", tp);
                   double lots = lotsize;
                      if(lotType==1){
                         if(sl==0){Alert("Cannot calculate lotsize as stoploss is 0"); return;}
                         if(sl!=0){lots = calcLots(entry-sl);}
                      }
                   if(sl==0){trade.Buy(lots,_Symbol,0,0,0,NULL);}
-                  if(sl!=0){trade.Buy(lots,_Symbol,0,sl,tp,NULL);}**/
+                  if(sl!=0){trade.Buy(lots,_Symbol,0,sl,tp,NULL);}
                   S1alreadyTraded++;
             }
       // Bounce back from R1
             Print("R1alreadyTraded is ",R1alreadyTraded);
             if(Highx1>R1 && Closex1<R1 && R1alreadyTraded<1){
-                 
+                 // Print("Highx1 is ",Highx1,"R1 is ",R1," Closex1 is ",Closex1);
                   double sl = calcSL(POSITION_TYPE_SELL,PP,S1,S2,R1,R2);
-                  double lots = lotsize;
-                  
-                  //if(sl==0){trade.Sell(lots,_Symbol,0,0,0,NULL);}
-                  //if(sl!=0){trade.Sell(lots,_Symbol,0,300,0,NULL);}
-                  
-                  
-                  trade.Sell(0.1,_Symbol,0,300,500,NULL);
-                  
-                  // Print("Highx1 is ",Highx1,"R1 is ",R1," Closex1 is ",Closex1);
-               /**   double sl = calcSL(POSITION_TYPE_SELL,PP,S1,S2,R1,R2);
                   double tp = calcTp(POSITION_TYPE_SELL,PP,S1,S2,R1,R2);
-                  //Print("sl is ",sl, " tp is ", tp);
+                  Print("sl is ",sl, " tp is ", tp);
                   double lots = lotsize;
                      if(lotType==1){
                         if(sl==0){Alert("Cannot calculate lotsize as stoploss is 0"); return;}
                         if(sl!=0){lots = calcLots(sl-entry);}
                      }
                   if(sl==0){trade.Sell(lots,_Symbol,0,0,0,NULL);}
-                  if(sl!=0){trade.Sell(lots,_Symbol,0,sl,tp,NULL);}**/
+                  if(sl!=0){trade.Sell(lots,_Symbol,0,sl,tp,NULL);}
                   R1alreadyTraded++;
             }      
             
       }
-      /**
+      
       if(PPTrChoice==2){  // Break trade style is selected
       
       // Break through S1
@@ -237,14 +216,9 @@ void OpenTrade(double PP, double S1, double S2, double R1, double R2){
                   if(sl!=0){trade.Sell(lots,_Symbol,0,sl,0,NULL);}
                   S1alreadyTraded++;
             }       
-      }**/
+      }
 }
-
-
-
-
-
-double calcSL(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R1, double R2){
+double calcSL(ENUM_POSITION_TYPE type,double PP, double S1, double S2, double R1, double R2){
 
    double entry=iClose(_Symbol,TF4Chart,1);
    double sl=0, tp1=0, tp2=0, tp=0, lots=lotsize;
@@ -252,19 +226,19 @@ double calcSL(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R
    if(PPTrChoice==1){ // Bounce style selected
    
       if(type==POSITION_TYPE_BUY){
-         if(SLChoice == 0 || (SLChoice == 1 && ManualSL== 0)){sl = 0;}
+         if(SLChoice==0 || (SLChoice==1 && ManualSL==0)){sl=0;}
          if(SLChoice==1 && ManualSL!=0){sl=entry-(ManualSL*_Point);}
-        // if(SLChoice==2){sl=0; Alert("Invalid stop");}
-         //if(SLChoice==3){sl=S1;}
-        // if(SLChoice==4){sl=S2;}
+         if(SLChoice==2){sl=0; Alert("Invalid stop");}
+         if(SLChoice==3){sl=S1;}
+         if(SLChoice==4){sl=S2;}
       
       }
       if(type==POSITION_TYPE_SELL){
          if(SLChoice==0 || (SLChoice==1 && ManualSL==0)){sl=0;}
          if(SLChoice==1 && ManualSL!=0){sl=entry+(ManualSL*_Point);}
-        // if(SLChoice==2){sl=0; Alert("Invalid stop");}
-        // if(SLChoice==3){sl=R1;}
-        // if(SLChoice==4){sl=R2;}
+         if(SLChoice==2){sl=0; Alert("Invalid stop");}
+         if(SLChoice==3){sl=R1;}
+         if(SLChoice==4){sl=R2;}
       }
    }
    
@@ -307,6 +281,7 @@ double calcLots(double slPoints){
    if(maxvolume!=0) lots = MathMin(lots,maxvolume);
    if(minvolume!=0) lots = MathMax(lots,minvolume);
    
+   
    lots = NormalizeDouble(lots,2);
    
    return lots;
@@ -346,11 +321,10 @@ bool CheckPlacedPositions(ulong pMagic)
 	bool placedPosition = false;
 	for(int i = PositionsTotal() - 1; i >= 0; i--)
 	{
-	   Print("There is only "+PositionsTotal()+" Position");
 	   ulong positionTicket = PositionGetTicket(i);
 	   PositionSelectByTicket(positionTicket);
 	   ulong posMagic = PositionGetInteger(POSITION_MAGIC);
-	   Print("posMagic - "+posMagic+ " ~ pMagic - "+pMagic);
+	   
 	   if(posMagic == pMagic)
 	   {
 	      placedPosition = true;
