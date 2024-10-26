@@ -23,7 +23,7 @@ CPositionInfo pos;
       enum PPTradingType {Bounce=1, Break=2};
       enum lotSizeType{Fixed_Lot=0, RiskPercentage=1};
       enum SLType{Inactive=0, Manual=1, PivotPoints=2, S1_R1=3, S2_R2=4};
-      
+      enum TPType{Inactive=0, Manual=1, PivotPoints=2, S1_R1=3, S2_R2=4};
       
 input group "================== Inputs for Pivot Points ================"
 
@@ -45,6 +45,8 @@ input group "==================  Trade Management ================"
 
       input SLType SLChoice = 1; 
       input int ManualSL = 0; // this is in points 1pip is 10 points
+      input TPType TPChoice = 1; 
+      input int ManualTP = 0; // this is in points 1pip is 10 points
 
 int OnInit()
   {
@@ -105,6 +107,9 @@ void OpenTrade(double PP, double S1, double S2, double R1, double R2){
       double Lowx1 = iLow(_Symbol,TF4Chart,1);
       double Closex1 = iClose(_Symbol,TF4Chart,1);
       double Highx1 = iHigh(_Symbol,TF4Chart,1);
+      
+      double entry = Closex1;
+
 
       if(PPTrChoice==1){  // Bounce trade style is selected
       
@@ -112,22 +117,37 @@ void OpenTrade(double PP, double S1, double S2, double R1, double R2){
             Print("S1alreadyTraded is ",S1alreadyTraded);
             if(Lowx1<S1 && Closex1>S1 && S1alreadyTraded<1){
                   double sl = calcSL(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
-                  //double tp = calcTp(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
-                  //Print("sl is ",sl, " tp is ", tp);
+                  double tp = calcTp(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
+                  Print("sl is ",sl, " tp is ", tp);
                   Print("sl is ",sl);
-                  trade.Buy(0.1,_Symbol,0,sl,0,NULL);
-                  
+                  Print("lotType is ",lotType);
+                  double lots = lotsize;
+                     if(lotType==1){
+                        lots = calcLots(entry-sl);
+                        Print("Lotsize is ",lotsize);
+                     }
+                  Print("Lots are ",lots);
+                  trade.Buy(lots,_Symbol,0,sl,tp,NULL);
+                  //R1alreadyTraded=0;
                   S1alreadyTraded++;
+                  
             }
       // Bounce back from R1
             Print("R1alreadyTraded is ",R1alreadyTraded);
             if(Highx1>R1 && Closex1<R1 && R1alreadyTraded<1){
                   double sl = calcSL(POSITION_TYPE_SELL,PP,S1,S2,R1,R2);
-                  //double tp = calcTp(POSITION_TYPE_BUY,PP,S1,S2,R1,R2);
-                  //Print("sl is ",sl, " tp is ", tp);
+                  double tp = calcTp(POSITION_TYPE_SELL,PP,S1,S2,R1,R2);
+                  Print("sl is ",sl, " tp is ", tp);
                   Print("sl is ",sl);
-                  trade.Sell(0.1,_Symbol,0,sl,0,NULL);
-                 
+                  Print("lotType is ",lotType);
+                  double lots = lotsize;
+                     if(lotType==1){
+                        lots = calcLots(sl-entry);
+                        Print("Lotsize is ",lotsize);
+                     }
+                  Print("Lots are ",lots);
+                  trade.Sell(lots,_Symbol,0,sl,tp,NULL);
+                  //S1alreadyTraded=0;
                   R1alreadyTraded++;
             }      
       }
@@ -138,7 +158,7 @@ void OpenTrade(double PP, double S1, double S2, double R1, double R2){
 bool CheckPlacedPositions(ulong pMagic)
 {	
 	bool placedPosition = false;
-	for(int i = PositionsTotal() - 1; i >= 0; i--)
+	for(int i = PositionsTotal() - 1; i >= 0; i--) // practice this loop
 	{
 	   Print("There is only "+PositionsTotal()+" Position");
 	   ulong positionTicket = PositionGetTicket(i);
@@ -151,6 +171,9 @@ bool CheckPlacedPositions(ulong pMagic)
 	   break;
 	   //}
 	}
+	S1alreadyTraded=0;
+	R1alreadyTraded=0;
+	Print("R1alreadyTraded is ",R1alreadyTraded,"and S1alreadyTraded is ",S1alreadyTraded);
 	return placedPosition;
 }
 
@@ -165,7 +188,7 @@ bool CheckPlacedPositions(ulong pMagic)
 double calcSL(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R1, double R2){
 
    double entry=iClose(_Symbol,TF4Chart,1);
-   double sl=0, tp1=0, tp2=0, tp=0, lots=lotsize;
+   double sl=0, lots=lotsize;
 
    if(PPTrChoice==1){ // Bounce style selected
    
@@ -183,8 +206,30 @@ double calcSL(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R
  }
  
  
+ 
+double calcTp(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R1, double R2){
+
+   double entry=iClose(_Symbol,TF4Chart,1);
+   double tp=0, tp1=0, tp2=0, lots=lotsize;
+
+   if(PPTrChoice==1){ // Bounce style selected
    
-/**  
+      if(type==POSITION_TYPE_BUY){
+         if(TPChoice==0 || (TPChoice==1 && ManualTP==0)){tp=0;}
+         if(TPChoice==1 && ManualTP!=0){tp=entry+(ManualTP*_Point);}
+      }
+      if(type==POSITION_TYPE_SELL){
+         if(TPChoice==0 || (TPChoice==1 && ManualTP==0)){tp=0;}
+         if(TPChoice==1 && ManualTP!=0){tp=entry-(ManualTP*_Point);}        
+      }
+   }
+
+return tp;
+   
+}
+ 
+  
+
 double calcLots(double slPoints){
 
    double risk = AccountInfoDouble(ACCOUNT_BALANCE) * RiskPct/100;
@@ -205,35 +250,8 @@ double calcLots(double slPoints){
    lots = NormalizeDouble(lots,2);
    
    return lots;
-}**/
-/**
-double calcTp(ENUM_POSITION_TYPE type, double PP, double S1, double S2, double R1, double R2){
+}
 
-   double entry=iClose(_Symbol,TF4Chart,1);
-   double tp1=0, tp2=0, tp=0, lots=lotsize;
-
-   if(PPTrChoice==1){ // Bounce style selected
-   
-      if(type==POSITION_TYPE_BUY){
-         if(SLChoice==0 || (SLChoice==1 && ManualSL==0)){tp=0;}
-         if(SLChoice==1 && ManualSL!=0){tp=entry+(ManualSL*_Point);}
-         if(SLChoice==2){tp=0; Alert("Invalid stop");}
-         if(SLChoice==3){tp=R1;}
-         if(SLChoice==4){tp=R2;}
-      
-      }
-      if(type==POSITION_TYPE_SELL){
-         if(SLChoice==0 || (SLChoice==1 && ManualSL==0)){tp=0;}
-         if(SLChoice==1 && ManualSL!=0){tp=entry-(ManualSL*_Point);}
-         if(SLChoice==2){tp=0; Alert("Invalid stop");}
-         if(SLChoice==3){tp=R1;}
-         if(SLChoice==4){tp=R2;}
-      }
-   }
-
-return tp;
-   
-}**/
 
 
 void DrawPivotPoints(double PP, double S1, double S2, double R1, double R2){
