@@ -1,7 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                       PPMain.mq5 |
 //|                                  Copyright 2024, MetaQuotes Ltd. |
-//|                                             https://www.mql5.com |
+//|                                             https://www.mql5.com
+//|                   Test
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, MetaQuotes Ltd."
 #property link      "https://www.mql5.com"
